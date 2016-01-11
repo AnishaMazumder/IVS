@@ -5,16 +5,16 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Random;
 
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
 
 import linearProgram.LinearProgram;
+import linearProgram.Rounding1;
 
 public class FBdataDriver {
-	private static boolean DEBUG = false;
+
 	public static void main(String args[]) throws IOException {
 		for(int count=0;count<1;count++){
 			for(int counter = 0; counter<1;counter++){
@@ -43,7 +43,8 @@ public class FBdataDriver {
 					PrintWriter pr = new PrintWriter("FBTopology.txt");
 					pr.println(nodeCount);
 					for(int i=0;i<nodeCount;i++){
-						pr.println(i+":"+"1:"+g.degreeOf(i));
+//						pr.println(i+":"+"1:"+g.degreeOf(i));
+						pr.println(i+":"+g.degreeOf(i)+":"+g.degreeOf(i));
 					}
 					brsd = new BufferedReader(new FileReader("Data/FB/facebook_combined.txt"));
 					while ((sdline = brsd.readLine()) != null) {
@@ -66,6 +67,11 @@ public class FBdataDriver {
 					LinearProgram mdpp = new LinearProgram(filenameTopology,filenameSeedSetA,budget);
 					mdpp.optimize();
 					mdpp.printValue();
+
+					Rounding1 roun = new Rounding1(filenameTopology,filenameSeedSetA,budget);
+					roun.optimizeAndRound();
+					roun.printValue();
+
 					//*/
 					//			brsd.close();
 				} catch (FileNotFoundException e) {

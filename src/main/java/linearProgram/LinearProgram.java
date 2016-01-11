@@ -3,12 +3,10 @@ package linearProgram;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,8 +24,6 @@ public class LinearProgram {
 	public static boolean undirected=true;
 	private int NODE_COUNT;// = 14;
 	public double epsilon = 0.001;
-	private static int total_successful_runs = 0;
-	
 	//cplex variable
 //	static IloCplex cplex = null;
 	IloCplex cplex;
@@ -125,13 +121,12 @@ public class LinearProgram {
 			
 			// create objective
 			createObjective();
-	         if(DEBUG)
-	        	 System.out.println(cplex.toString());
+//	         if(DEBUG)
+//	        	 System.out.println(cplex.toString());
 			if ( cplex.solve() ) {
 				if(DEBUG){
 				System.out.println("----------------------------------------");
 	            System.out.println("Obj " + cplex.getObjValue());
-	            total_successful_runs++;
 	            System.out.println();
 				}
 	            
@@ -196,10 +191,10 @@ public class LinearProgram {
 	public void createConstraint3() {
 		try {
 			
-			Iterator iterator = seedSetA.iterator(); 
+			Iterator<Integer> iterator = seedSetA.iterator(); 
 			while (iterator.hasNext()){
 				IloLinearNumExpr expr3=cplex.linearNumExpr();
-				int nodeID = (int)iterator.next();
+				int nodeID = (Integer)iterator.next();
 				expr3.addTerm(1.0,X_p[nodeID]);
 				cplex.addEq(expr3, 1.0, ": Contraint 3 for node " + nodeID);
 //			   System.out.println("Value: "+iterator.next() + " ");  
@@ -281,8 +276,9 @@ public void printValue()
 			}
 		System.out.println("\n obj value ="+cplex.getValue(expr));
 //		System.out.println(cplex.toString());
-		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("outputtfile.txt", true)))) 
+		try 
 		{
+			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("outputtfile.txt", true)));
 			out.println("obj value ="+cplex.getValue(expr));
 			if(DEBUG)
 				System.out.print("\n");

@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import linearProgram.LinearProgram;
+import linearProgram.Rounding1;
 
-public class LPDriver {
+public class RoundingDriver {
 	
 	
 	public static void main(String args[]) throws IOException {
@@ -39,8 +39,8 @@ public class LPDriver {
 			int nodeCount = Integer.parseInt(brsd.readLine());
 			brsd.close();
 			budget = (int) (nodeCount * 0.2);
-			LinearProgram mdpp = new LinearProgram(filenameTopology,filenameSeedSetA,budget);
-			mdpp.optimize();
+			Rounding1 mdpp = new Rounding1(filenameTopology,filenameSeedSetA,budget);
+			mdpp.optimizeAndRound();
 			mdpp.printValue();
 			//*/
 //			}

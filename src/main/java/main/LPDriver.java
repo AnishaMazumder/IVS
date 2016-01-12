@@ -13,8 +13,9 @@ public class LPDriver {
 		for(int count=0;count<1;count++){
 		for(int counter = 0; counter<1;counter++){
 //		String fileName = "Facebook/Data/Data_"+counter+".txt";
-		String filenameTopology = "testTopology.txt";
-		String filenameSeedSetA = "testSeedSetA.txt";
+//		String filenameTopology = "testTopology.txt";
+		String filenameTopology = "FBTopology.txt";
+		String filenameSeedSetA = "FBSeedSetA.txt";
 		//String fileName="MyArpanet_graph.txt";
 		
 		try {

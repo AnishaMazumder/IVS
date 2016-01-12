@@ -95,10 +95,7 @@ public class Rounding1 {
 
 			cplex = new IloCplex();		
 			//cplex.setOut(null);
-			X_p = new IloIntVar[NODE_COUNT];
-			X_q = new IloIntVar[NODE_COUNT];
-			X_s = new IloIntVar[NODE_COUNT];
-
+			
 			if(DEBUG)
 			{	
 				System.out.println("There are total "+NODE_COUNT+" nodes with"+seedSetA.size()+" nodes in seedSetA = ");
@@ -137,18 +134,19 @@ public class Rounding1 {
 					System.out.println("Obj " + cplex.getObjValue());
 					System.out.println();
 				}
-				HashSet<Integer> nodesInS1 = round1();  // only LP values
-				findPartition(nodesInS1,1);
-				HashSet<Integer> nodesInS2 = round2(); // LP values/cost
-				findPartition(nodesInS2,2);
-				HashSet<Integer> nodesInS3 = round3(); // LP values*utility
-				findPartition(nodesInS3,3);
+				
 				
 			}
 
 		} catch (Exception exc) {
-			System.err.println("Concert exception '" + exc + "' caught");
+			System.err.println("Concert exception '" + exc.getStackTrace() + "' caught");
 		}
+		HashSet<Integer> nodesInS1 = round1();  // only LP values
+		findPartition(nodesInS1,1);
+		HashSet<Integer> nodesInS2 = round2(); // LP values/cost
+		findPartition(nodesInS2,2);
+		HashSet<Integer> nodesInS3 = round3(); // LP values*utility
+		findPartition(nodesInS3,3);
 	}
 	private HashSet<Integer> round3() {
 		// 
@@ -159,8 +157,6 @@ public class Rounding1 {
 			for(int i=0;i<NODE_COUNT;i++){
 				nodeIDs[i] = i;
 				xsValues[i] = cplex.getValue(X_s[i]);
-				if(xsValues[i]==1)
-					nodesInS.add(i);
 			}
 			int temp;
 			for(int i=0;i<NODE_COUNT;i++){
@@ -173,17 +169,15 @@ public class Rounding1 {
 				}
 			}
 			int remainingBudget = budget;
-			int i=0;
-			while(xsValues[i]==1){ //compute budget remaining after taking all nodes with X_s value = 1 
-				remainingBudget-=nodeCost.get(i);
-				i++;
-			}
-			for(i=0;i<NODE_COUNT && remainingBudget>0;i++){ // take all nodes with highest X_s values till budget permits
-				if(nodeCost.get(nodeIDs[i])<=remainingBudget){
+			
+			for(int i=0;i<NODE_COUNT && remainingBudget>0;i++){ // take all nodes with highest X_s values till budget permits
+				if(nodeCost.get(nodeIDs[i])<=remainingBudget &&!seedSetA.contains(nodeIDs[i])){
 				nodesInS.add(nodeIDs[i]);
 				remainingBudget-=nodeCost.get(nodeIDs[i]);
 				}
 			}
+			System.out.println("\n Final remaining budget = "+ remainingBudget + " size of nodesInS " +nodesInS.size());
+			
 			return nodesInS;
 			
 		} catch (IloException e) {
@@ -202,8 +196,6 @@ public class Rounding1 {
 			for(int i=0;i<NODE_COUNT;i++){
 				nodeIDs[i] = i;
 				xsValues[i] = cplex.getValue(X_s[i]);
-				if(xsValues[i]==1)
-					nodesInS.add(i);
 			}
 			int temp;
 			for(int i=0;i<NODE_COUNT;i++){
@@ -216,17 +208,15 @@ public class Rounding1 {
 				}
 			}
 			int remainingBudget = budget;
-			int i=0;
-			while(xsValues[i]==1){ //compute budget remaining after taking all nodes with X_s value = 1 
-				remainingBudget-=nodeCost.get(i);
-				i++;
-			}
-			for(;i<NODE_COUNT && remainingBudget>0;i++){ // take all nodes with highest X_s values till budget permits
-				if(nodeCost.get(nodeIDs[i])<=remainingBudget){
+			
+			for(int i=0;i<NODE_COUNT && remainingBudget>0;i++){ // take all nodes with highest X_s values till budget permits
+				if(nodeCost.get(nodeIDs[i])<=remainingBudget&&!seedSetA.contains(nodeIDs[i])){
 				nodesInS.add(nodeIDs[i]);
 				remainingBudget-=nodeCost.get(nodeIDs[i]);
 				}
 			}
+			System.out.println("\n Final remaining budget = "+ remainingBudget + " size of nodesInS " +nodesInS.size());
+			
 			return nodesInS;
 			
 		} catch (IloException e) {
@@ -249,6 +239,7 @@ public class Rounding1 {
 					g.addEdge(i, j);
 			}
 		}
+//		System.out.println("SeedSet intersection s1 = "+nodesInS1.retainAll(seedSetA));
 		g.addVertex(NODE_COUNT); // add a dummy node
 		//add dummy edges
 		Iterator<Integer> iterator = seedSetA.iterator(); 
@@ -274,6 +265,9 @@ public class Rounding1 {
 	        		objValue+=nodeUtility.get(iterator.next());
 	        	}
 	        	out.println("\n"+objValue);
+	        	PrintWriter outobj = new PrintWriter(new BufferedWriter(new FileWriter("objective values.txt", true)));
+				outobj.println("Rounding"+roundingStrategy+" obj value ="+objValue);
+				outobj.close();
 	        	if(DEBUG)
 		        	System.out.println("\n"+objValue);
 	        	if(DEBUG)
@@ -346,12 +340,10 @@ public class Rounding1 {
 			for(int i=0;i<NODE_COUNT;i++){
 				nodeIDs[i] = i;
 				xsValues[i] = cplex.getValue(X_s[i]);
-				if(xsValues[i]==1)
-					nodesInS.add(i);
 			}
 			int temp;
-			for(int i=0;i<NODE_COUNT;i++){
-				for(int j =0;j<=i;j++){
+			for(int i=1;i<NODE_COUNT;i++){
+				for(int j =0;j<i;j++){
 					if(xsValues[nodeIDs[j]]<xsValues[nodeIDs[i]]){
 						temp =nodeIDs[i];
 						nodeIDs[i] = nodeIDs[j];
@@ -360,17 +352,15 @@ public class Rounding1 {
 				}
 			}
 			int remainingBudget = budget;
-			int i=0;
-			while(xsValues[i]==1){ //compute budget remaining after taking all nodes with X_s value = 1 
-				remainingBudget-=nodeCost.get(i);
-				i++;
-			}
-			for(i=0;i<NODE_COUNT && remainingBudget>0;i++){ // take all nodes with highest X_s values till budget permits
-				if(nodeCost.get(nodeIDs[i])<=remainingBudget){
+			
+			for(int i=0;i<NODE_COUNT && remainingBudget>=0;i++){ // take all nodes with highest X_s values till budget permits
+				if(nodeCost.get(nodeIDs[i])<=remainingBudget&&!seedSetA.contains(nodeIDs[i])){
 				nodesInS.add(nodeIDs[i]);
 				remainingBudget-=nodeCost.get(nodeIDs[i]);
 				}
 			}
+			System.out.println("\n Final remaining budget = "+ remainingBudget + " size of nodesInS " +nodesInS.size());
+			System.out.println(nodesInS.toString());
 			return nodesInS;
 			
 		} catch (IloException e) {
@@ -439,7 +429,7 @@ public class Rounding1 {
 			Iterator<Integer> iterator = seedSetA.iterator(); 
 			while (iterator.hasNext()){
 				IloLinearNumExpr expr3=cplex.linearNumExpr();
-				int nodeID = (int)iterator.next();
+				int nodeID = (Integer)iterator.next();
 				expr3.addTerm(1.0,X_p[nodeID]);
 				cplex.addEq(expr3, 1.0, ": Contraint 3 for node " + nodeID);
 				//			   System.out.println("Value: "+iterator.next() + " ");  
@@ -456,7 +446,7 @@ public class Rounding1 {
 			for (int i =  0; i < NODE_COUNT; i++) {
 				expr4.addTerm((double)nodeCost.get(i),X_s[i]);
 			}
-			cplex.addEq(expr4, budget, ": Contraint 4 " );
+			cplex.addLe(expr4, budget, ": Contraint 4 " );
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}		
@@ -524,8 +514,11 @@ public class Rounding1 {
 			DecimalFormat numberFormat = new DecimalFormat("0.000");
 			try 
 			{
-				PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("outputtfile.txt", true)));
+				PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("LPoutputfile.txt", true)));
 				out.println("obj value ="+cplex.getValue(expr));
+				PrintWriter outobj = new PrintWriter(new BufferedWriter(new FileWriter("objective values.txt", true)));
+				outobj.println("LP obj value ="+cplex.getValue(expr));
+				outobj.close();
 				if(DEBUG)
 					System.out.print("\n");
 				out.print("\n");
@@ -539,8 +532,8 @@ public class Rounding1 {
 					}
 				}
 				if(DEBUG){
-					System.out.println("Count of fractional X_p values = " + tempCount);
-					out.println("Count of fractional X_p values = " + tempCount);
+					System.out.println("\n Count of fractional X_p values = " + tempCount);
+					out.println("\n Count of fractional X_p values = " + tempCount);
 					tempCount=0;
 				}
 				if(DEBUG)
@@ -555,8 +548,8 @@ public class Rounding1 {
 					}
 				}
 				if(DEBUG){
-					System.out.println("Count of fractional X_q values = " + tempCount);
-					out.println("Count of fractional X_q values = " + tempCount);
+					System.out.println("\n Count of fractional X_q values = " + tempCount);
+					out.println("\n Count of fractional X_q values = " + tempCount);
 					tempCount=0;
 				}
 				if(DEBUG)
@@ -572,8 +565,8 @@ public class Rounding1 {
 
 				}
 				if(DEBUG){
-					System.out.println("Count of fractional X_s values = " + tempCount);
-					out.println("Count of fractional X_s values = " + tempCount);
+					System.out.println("\n Count of fractional X_s values = " + tempCount);
+					out.println("\n Count of fractional X_s values = " + tempCount);
 					tempCount=0;
 				}
 				out.close();

@@ -87,10 +87,7 @@ public class LinearProgram {
 			
 			cplex = new IloCplex();		
 			//cplex.setOut(null);
-			X_p = new IloIntVar[NODE_COUNT];
-			X_q = new IloIntVar[NODE_COUNT];
-			X_s = new IloIntVar[NODE_COUNT];
-			
+						
 			if(DEBUG)
 			{	
 				System.out.println("There are total "+NODE_COUNT+" nodes with"+seedSetA.size()+" nodes in seedSetA = ");
@@ -211,7 +208,7 @@ public class LinearProgram {
 			for (int i =  0; i < NODE_COUNT; i++) {
 					expr4.addTerm((double)nodeCost.get(i),X_s[i]);
      }
-			cplex.addEq(expr4, budget, ": Contraint 4 " );
+			cplex.addLe(expr4, budget, ": Contraint 4 " );
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}		
@@ -278,7 +275,7 @@ public void printValue()
 //		System.out.println(cplex.toString());
 		try 
 		{
-			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("outputtfile.txt", true)));
+			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("LPDriverOutputfile.txt", true)));
 			out.println("obj value ="+cplex.getValue(expr));
 			if(DEBUG)
 				System.out.print("\n");
@@ -293,8 +290,8 @@ public void printValue()
 				}
 			}
 			if(DEBUG){
-				System.out.println("Count of fractional X_p values = " + tempCount);
-				out.println("Count of fractional X_p values = " + tempCount);
+				System.out.println("\n Count of fractional X_p values = " + tempCount);
+				out.println("\n Count of fractional X_p values = " + tempCount);
 				tempCount=0;
 			}
 			if(DEBUG)
@@ -309,8 +306,8 @@ public void printValue()
 			}
 			}
 			if(DEBUG){
-				System.out.println("Count of fractional X_q values = " + tempCount);
-				out.println("Count of fractional X_q values = " + tempCount);
+				System.out.println("\n Count of fractional X_q values = " + tempCount);
+				out.println("\n Count of fractional X_q values = " + tempCount);
 				tempCount=0;
 			}
 			if(DEBUG)
@@ -326,8 +323,8 @@ public void printValue()
 					
 			}
 			if(DEBUG){
-				System.out.println("Count of fractional X_s values = " + tempCount);
-				out.println("Count of fractional X_s values = " + tempCount);
+				System.out.println("\n Count of fractional X_s values = " + tempCount);
+				out.println("\n Count of fractional X_s values = " + tempCount);
 				tempCount=0;
 			}
 			out.close();

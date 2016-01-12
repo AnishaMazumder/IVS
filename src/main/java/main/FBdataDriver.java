@@ -10,6 +10,7 @@ import java.util.Random;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
 
+import linearProgram.IntegerLinearProgram;
 import linearProgram.LinearProgram;
 import linearProgram.Rounding1;
 
@@ -40,33 +41,39 @@ public class FBdataDriver {
 					}
 					brsd.close();
 					int nodeCount = 4039;
-					PrintWriter pr = new PrintWriter("FBTopology.txt");
-					pr.println(nodeCount);
-					for(int i=0;i<nodeCount;i++){
-//						pr.println(i+":"+"1:"+g.degreeOf(i));
-						pr.println(i+":"+g.degreeOf(i)+":"+g.degreeOf(i));
-					}
-					brsd = new BufferedReader(new FileReader("Data/FB/facebook_combined.txt"));
-					while ((sdline = brsd.readLine()) != null) {
-						String[] sdlinearray=sdline.split(" ");
-						pr.println(sdlinearray[0]+":"+sdlinearray[1]);
-					}
-					brsd.close();
-					pr.close();
-
-					budget = (int) (nodeCount * 0.2);
-					//create seedsetA
-					pr = new PrintWriter("FBSeedSetA.txt");
-					Random ran = new Random();
-					for(int i=0;i<nodeCount;i++){
-						if(ran.nextDouble()>0.5){
-							pr.write(i+"\n");
-						}
-					}
-					pr.close();
-					LinearProgram mdpp = new LinearProgram(filenameTopology,filenameSeedSetA,budget);
-					mdpp.optimize();
-					mdpp.printValue();
+					System.out.println("//** For Cost of nodes = 1 ****//");
+//					PrintWriter pr = new PrintWriter("FBTopology.txt");
+//					pr.println(nodeCount);
+//					for(int i=0;i<nodeCount;i++){
+////						pr.println(i+":"+"1:"+g.degreeOf(i));
+//						pr.println(i+":1:"+g.degreeOf(i));
+//					}
+//					brsd = new BufferedReader(new FileReader("Data/FB/facebook_combined.txt"));
+//					while ((sdline = brsd.readLine()) != null) {
+//						String[] sdlinearray=sdline.split(" ");
+//						pr.println(sdlinearray[0]+":"+sdlinearray[1]);
+//					}
+//					brsd.close();
+//					pr.close();
+//
+					budget = (int) (nodeCount * 0.35);
+//					//create seedsetA
+//					pr = new PrintWriter("FBSeedSetA.txt");
+//					Random ran = new Random();
+//					for(int i=0;i<nodeCount;i++){
+//						if(ran.nextDouble()>0.5){
+//							pr.write(i+"\n");
+//						}
+//					}
+//					pr.close();
+					
+					IntegerLinearProgram ilp = new IntegerLinearProgram(filenameTopology,filenameSeedSetA,budget);
+					ilp.optimize();
+					ilp.printValue();
+					
+//					LinearProgram mdpp = new LinearProgram(filenameTopology,filenameSeedSetA,budget);
+//					mdpp.optimize();
+//					mdpp.printValue();
 
 					Rounding1 roun = new Rounding1(filenameTopology,filenameSeedSetA,budget);
 					roun.optimizeAndRound();
